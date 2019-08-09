@@ -1,3 +1,10 @@
+# THIS IS BROKEN
+Works for everythign but the 'submit job' request string. The error is it's not JSON
+
+Use the swagger2 api until this is fixed.
+
+The code under config and txqueue is completely independent of which version api to use.
+
 # Swagger generated server
 
 ## Overview
