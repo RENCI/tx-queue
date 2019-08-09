@@ -1,0 +1,250 @@
+---
+swagger: "2.0"
+info:
+  description: ""
+  version: "2"
+  title: "RENCI Translational Science simple queue API: Swagger v2.0"
+  termsOfService: "http://cellfie.renci.org/TOS/"
+  contact:
+    email: "n4lewis@ucsd.edu"
+  license:
+    name: "Apache 2.0"
+    url: "http://www.apache.org/licenses/LICENSE-2.0.html"
+host: "cellfie2.renci.org:8080"
+basePath: "/tx-queue/2"
+tags:
+- name: "scheduler"
+  description: "Everything about scheduling your jobs"
+  externalDocs:
+    description: "Find out more"
+    url: "http://cellfie.renci.org"
+schemes:
+- "https"
+- "http"
+paths:
+  /scheduler/job:
+    get:
+      tags:
+      - "scheduler"
+      summary: "Lists queued jobs"
+      description: "Returns a map of status codes to job ids"
+      operationId: "get_job_queue"
+      produces:
+      - "application/json"
+      parameters: []
+      responses:
+        200:
+          description: "successful operation"
+          examples:
+            application/json:
+            - id: 1
+              user: "bradley@gmail.com"
+              payload: "doi 10.5555/55555"
+              scheduledTimestamp: "2019-07-21T17:32:28Z"
+              submitTimestamp: "2019-07-21T17:33:28Z"
+              endTimestamp: "2019-07-21T17:34:28Z"
+              systemRunTime: "PT1M"
+              status: "finished"
+            - id: 2
+              user: "bradley@gmail.com"
+              payload: "doi 10.5555/55555"
+              scheduledTimestamp: "2019-08-01T18:32:29Z"
+              submitTimestamp: "2019-08-02T10:45:30Z"
+              endTimestamp: "2019-08-02T11:55:30Z"
+              systemRunTime: "PT1H10M"
+              status: "aborted"
+            - id: 3
+              user: "tori@gmail.com"
+              payload: "{runid: 25516}"
+              scheduledTimestamp: "2019-08-01T18:32:30Z"
+              submitTimestamp: "2019-08-02T10:35:30Z"
+              endTimestamp: "2019-08-02T11:55:40Z"
+              systemRunTime: "PT1H20M10S"
+              status: "error"
+            - id: 4
+              user: "frank@gmail.com"
+              payload: "{runid: 25516}"
+              scheduledTimestamp: "2019-08-01T18:32:31Z"
+              submitTimestamp: "2019-08-02T10:35:30Z"
+              endTimestamp: "2019-08-04T11:55:40Z"
+              systemRunTime: "PT2D1H20M10S"
+              status: "finished"
+            - id: 5
+              user: "joan@gmail.com"
+              payload: "{train: \"http:/github.com/path/file1\", seed:5, epochs: 5000\
+                \ }"
+              scheduledTimestamp: "2019-08-01T18:32:32Z"
+              submitTimestamp: "2019-08-02T10:35:31Z"
+              endTimestamp: ""
+              systemRunTime: ""
+              status: "running"
+            - id: 6
+              user: "joan@gmail.com"
+              payload: "{train: \"http:/github.com/path/file2\", seed:5, epochs: 5000}"
+              scheduledTimestamp: "2019-08-01T18:32:33Z"
+              submitTimestamp: ""
+              endTimestamp: ""
+              systemRunTime: ""
+              status: "queued"
+            - id: 7
+              user: "joan@gmail.com"
+              payload: "{train: \"http:/github.com/path/file2\", seed:5, epochs: 5000}"
+              scheduledTimestamp: "2019-08-01T18:32:34Z"
+              submitTimestamp: "2019-08-02T10:35:31Z"
+              endTimestamp: ""
+              systemRunTime: ""
+              status: "initializing"
+          schema:
+            type: "object"
+            additionalProperties:
+              type: "integer"
+              format: "int32"
+      x-swagger-router-controller: "swagger_server.controllers.scheduler_controller"
+    post:
+      tags:
+      - "scheduler"
+      summary: "Submit a job"
+      description: "Set up the job to be run outside of the scheduler. The scheduler\
+        \ doesn't care what the job set-up looks like as long as it's well-constructed\
+        \ JSON. For example, the set-up could be a serialized object with all the\
+        \ parameters necessary for the run, or it could be a quoted unique id that\
+        \ the application-specific worker knows how to lookup in a database to get\
+        \ the parameters necessary for the run."
+      operationId: "submit_job"
+      produces:
+      - "application/json"
+      - "application/xml"
+      parameters:
+      - in: "body"
+        name: "payload"
+        description: "The string defining the analysis to be completed."
+        required: true
+        schema:
+          type: "string"
+          example: "{setupId: 25516}"
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/Job"
+        400:
+          description: "Invalid Job"
+      x-swagger-router-controller: "swagger_server.controllers.scheduler_controller"
+  /scheduler/job/{jobId}:
+    get:
+      tags:
+      - "scheduler"
+      summary: "Find my job by Id"
+      description: "For valid response try integer Ids with value >= 1 and <= 1000.\\\
+        \ \\ Other values will generated exceptions"
+      operationId: "get_job_by_id"
+      produces:
+      - "application/json"
+      - "application/xml"
+      parameters:
+      - name: "jobId"
+        in: "path"
+        description: "Id of job to be fetched"
+        required: true
+        type: "string"
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/Job"
+        400:
+          description: "Invalid Id supplied"
+        404:
+          description: "Job not found"
+      x-swagger-router-controller: "swagger_server.controllers.scheduler_controller"
+    delete:
+      tags:
+      - "scheduler"
+      summary: "Delete my job by Id"
+      description: "Upon success, marks job as 'aborted' if it must be suspended,\
+        \ and returns the deleted job with the appropriate status"
+      operationId: "delete_job"
+      produces:
+      - "application/json"
+      - "application/xml"
+      parameters:
+      - name: "jobId"
+        in: "path"
+        description: "Id of the job that needs to be deleted"
+        required: true
+        type: "string"
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/Job"
+        400:
+          description: "Invalid Id supplied"
+        404:
+          description: "Job not found"
+      x-swagger-router-controller: "swagger_server.controllers.scheduler_controller"
+definitions:
+  Job:
+    type: "object"
+    required:
+    - "id"
+    - "payload"
+    - "scheduledTimestamp"
+    - "status"
+    - "user"
+    properties:
+      id:
+        type: "integer"
+        format: "int64"
+        description: "The id for the job, unique within the job scheduler"
+      user:
+        type: "string"
+        description: "This can reference the human user (e.g., email or username)\
+          \ or the client software (e.g., API key) that submitted the job."
+      payload:
+        type: "string"
+        description: "This string describes the run parameters to the application-specific\
+          \ worker that removes the job from the queue and processes it. As such,\
+          \ it can be a full payload of parameters describing the run, or a URL/DOI\
+          \ to an external resource that provides that information, or even a runID\
+          \ in the worker's database."
+      scheduledTimestamp:
+        type: "string"
+        format: "date-time"
+        description: "Time the job was submitted by the client"
+      submitTimestamp:
+        type: "string"
+        format: "date-time"
+        description: "Time the job began to run"
+      endTimestamp:
+        type: "string"
+        format: "date-time"
+        description: "Time the job finished running"
+      systemRunTime:
+        type: "string"
+        format: "iso8601"
+        description: "Duration of the run"
+      status:
+        type: "string"
+        description: "Job Status"
+        default: "queued"
+        enum:
+        - "queued"
+        - "initializing"
+        - "running"
+        - "finished"
+        - "suspended"
+        - "aborted"
+        - "error"
+    example:
+      id: 5
+      user: "jane@gmail.com"
+      scheduledTimestamp: "2017-07-21T17:32:28Z"
+      submitTimestamp: "2017-07-21T17:33:28Z"
+      systemRunTime: "PT1M"
+      endTimestamp: "2017-07-21T17:34:28Z"
+      payload: "doi 10.5555/55555"
+      status: "finished"
+externalDocs:
+  description: "Find out more about Swagger"
+  url: "http://swagger.io"
