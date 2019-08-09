@@ -1,3 +1,10 @@
+# THIS IS BROKEN
+Works for everythign but the 'submit job' request string. The error is it's not JSON
+
+Use the swagger2 api until this is fixed.
+
+The code under config and txqueue is completely independent of which version api to use.
+
 # Swagger generated server
 
 ## Overview
@@ -7,35 +14,10 @@ is an example of building a swagger-enabled Flask server.
 
 This example uses the [Connexion](https://github.com/zalando/connexion) library on top of Flask.
 
-## Requirements
-Python 3.5.2+
-
 ## Usage
-To run the server, please execute the following from the root directory:
+refer to README.md in tx-queue
 
-```
-pip3 install -r requirements.txt
-python3 -m swagger_server
-```
-
-and open your browser to here:
-
-```
-http://cellfie2.renci.org:8080/tx-queue/2/ui/
-```
-
-Your Swagger definition lives here:
-
-```
-http://cellfie2.renci.org:8080/tx-queue/2/swagger.json
-```
-
-To launch the integration tests, use tox:
-```
-sudo pip install tox
-tox
-```
-
+docker is untested, see next section for tips
 ## Running with Docker
 
 To run the server on a Docker container, please execute the following from the root directory:
