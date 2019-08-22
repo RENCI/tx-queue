@@ -9,7 +9,7 @@ from swagger_server.models.job import Job  # noqa: E501
 from swagger_server import util
 
 
-def delete_job(job_id):  # noqa: E501
+def delete_job(jobId):  # noqa: E501
     """Delete my job by Id
 
     Upon success, marks job as &#x27;aborted&#x27; if it must be suspended, and returns the deleted job with the appropriate status # noqa: E501
@@ -19,10 +19,10 @@ def delete_job(job_id):  # noqa: E501
 
     :rtype: Job
     """
-    return disp.delete_job(job_id)
+    return disp.delete_job(jobId)
 
 
-def get_job_by_id(job_id):  # noqa: E501
+def get_job_by_id(jobId):  # noqa: E501
     """Find my job by Id
 
     For valid response try integer Ids with value &gt;&#x3D; 1 and &lt;&#x3D; 1000.\\ \\ Other values will generated exceptions # noqa: E501
@@ -33,7 +33,7 @@ def get_job_by_id(job_id):  # noqa: E501
     :rtype: Job
     """
 
-    return disp.get_job_by_id(job_id)
+    return disp.get_job_by_id(jobId)
 
 
 def get_job_queue():  # noqa: E501
@@ -58,8 +58,4 @@ def submit_job(body=None):  # noqa: E501
 
     :rtype: Job
     """
-    if connexion.request.is_json:
-        body = str.from_dict(connexion.request.get_json())  # noqa: E501
-
-
-    return disp.submit_job(body)
+    return disp.submit_job(connexion.request.get_json())

@@ -4,8 +4,16 @@
 import sys
 sys.path.append('../..')
 # and the full path to this file will be txqueue.scheduler.dispatcher
-import txqueue.scheduler.examples as ex
 
+import json
+import redis
+from rq import Queue
+import os
+import entrypoint
+
+q = Queue(connection=redis.StrictRedis(host=os.environ["REDIS_QUEUE_HOST"], port=int(os.environ["REDIS_QUEUE_PORT"]), db=int(os.environ["REDIS_QUEUE_DB"])))
+
+TASK_TIME=os.environ["TASK_TIME"]
 
 def delete_job(job_id):
     """Delete my job by Id
@@ -17,9 +25,10 @@ def delete_job(job_id):
 
     :rtype: Job
     """
-    job = ex.xJob
+    job = q.fetch_job(job_id)
+    job.cancel()
+    return job_id
 
-    return job
 
 
 def get_job_by_id(job_id):  # noqa: E501
@@ -32,9 +41,17 @@ def get_job_by_id(job_id):  # noqa: E501
 
     :rtype: Job
     """
-    job = ex.xJob
-
-    return '[dispatcher]get:'+job_id+",job="+job
+    job = q.fetch_job(job_id)
+    return {
+        "status": job.get_status(),
+        "name": job.func_name,
+        "created_at": str(job.created_at),
+        "enqueued_at": str(job.enqueued_at),
+        "started_at": str(job.started_at),
+        "ended_at": str(job.ended_at),
+        "description": job.description,
+        "result": job.result
+    }
 
 
 def get_job_queue():  # noqa: E501
@@ -45,9 +62,7 @@ def get_job_queue():  # noqa: E501
 
     :rtype: Dict[str, int]
     """
-    jobs = ex.xJobs
-
-    return '[dispatcher]list jobs:'+jobs
+    return q.job_ids
 
 
 def submit_job(body=None):  # noqa: E501
@@ -60,6 +75,7 @@ def submit_job(body=None):  # noqa: E501
 
     :rtype: Job
     """
-    job = ex.xJob
+    pTable = q.enqueue(entrypoint.run, args=[body], job_timeout=TASK_TIME)
+    return pTable.id            
 
-    return '[dispatcher]submit job, payload:'+body+",job="+job
+
