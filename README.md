@@ -76,6 +76,6 @@ docker-compose -f docker-compose.yml -f worker/docker-compose.yml up --build
 ## test
 ```
 docker-compose -f docker-compose.yml -f test/docker-compose.yml up --build --exit-code-from txqueue-test
-docker-compose -f docker-compose.yml -f worker/docker-compose.yml -f worker/test/docker-compose.yml up --build --exit-code-from txqueue-test
+docker-compose -f docker-compose.yml -f worker/docker-compose.yml -f worker/test/docker-compose.yml up --build --exit-code-from txqueue-worker-test
 
 ```
