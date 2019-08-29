@@ -51,6 +51,17 @@ docker build -t swagger_server .
 docker run -p 8080:8080 swagger_server
 ```
 
+
+## job submission format
+```
+{
+  "image": docker image,
+  "command": command to run in image
+}
+```
+
+
+
 ## run
 ```
 docker-compose -f docker-compose.yml up --build
