@@ -8,6 +8,9 @@ services:
       context: .
       dockerfile: worker/test/Dockerfile
     image: txqueue-worker-test:0.1.0
+    command: ["-vv"]
+    volumes:
+      - /tmp:/tmp
     environment:
       REDIS_QUEUE_HOST: redis
       REDIS_QUEUE_PORT: 6379

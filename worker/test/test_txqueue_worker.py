@@ -28,10 +28,11 @@ json_headers = {
 }
 
 
-def post_task(img, cmd):
+def post_task(img, cmd, volumes=[]):
     resp = requests.post("http://txqueue:8080/tx-queue/2/scheduler/job", headers=json_headers, data=json.dumps({
         "image": img,
-        "command": cmd
+        "command": cmd,
+        "mounts": volumes
     }))
     print(resp)
     return resp
@@ -56,6 +57,31 @@ def test_run_rqworker():
         
     assert resp2.json()["result"] == "from worker\n"
     
+
+def test_run_rqworker_volume_read():
+    assert not os.path.exists("/tmp/read")
+        
+    with open("/tmp/read", mode="w+") as f:
+        f.write("from rq")
+        
+    resp = post_task("ubuntu:18.04", "cat /read", volumes=[
+        {
+            "source": "/tmp/read",
+            "target": "/read",
+            "type": "bind",
+            "read_only": True
+        }
+    ])
+    task_id = resp.json()
+    resp2 = get_task(task_id)
+    print(resp2.json())
+    while resp2.json()["status"] in ["queued", "started"]:
+        time.sleep(1)
+        resp2 = get_task(task_id)
+        print(resp2.json())
+        
+    assert resp2.json()["result"] == "from rq\n"
+    os.unlink("/tmp/read")
 
 
 
