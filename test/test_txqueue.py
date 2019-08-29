@@ -6,6 +6,7 @@ import json
 import redis
 from rq import Queue, Worker
 from multiprocessing import Process
+from utils import startWorker, redisQueue
 
 @pytest.fixture(scope="session", autouse=True)
 def pause():
@@ -44,16 +45,6 @@ json_headers = {
 }
 
 
-def redisQueue():
-    return redis.StrictRedis(host=os.environ["REDIS_QUEUE_HOST"], port=int(os.environ["REDIS_QUEUE_PORT"]), db=int(os.environ["REDIS_QUEUE_DB"]))
-
-
-def startWorker():
-    conn = redisQueue()
-    worker = Worker(Queue(connection=conn), connection=conn)
-    worker.work()
-
-    
 def runWorker():
     p = Process(target = startWorker)
     workers = Worker.all(connection=redisQueue())

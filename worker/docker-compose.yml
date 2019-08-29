@@ -1,13 +1,13 @@
-version: '3'
+'version: '3'
 
 services:
     
-  txqueue-test:
-    container_name: txqueue-test
+  txqueue-worker:
+    container_name: txqueue-worker
     build:
       context: .
-      dockerfile: test/Dockerfile
-    image: txqueue-test:0.1.0
+      dockerfile: worker/Dockerfile
+    image: txqueue-worker:0.1.0
     environment:
       REDIS_QUEUE_HOST: redis
       REDIS_QUEUE_PORT: 6379
@@ -15,7 +15,7 @@ services:
       TASK_TIME: 3000
     depends_on:
       - redis
-      - txqueue
+ 
     
 
 
