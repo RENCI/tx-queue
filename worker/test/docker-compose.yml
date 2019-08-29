@@ -2,12 +2,12 @@ version: '3.4'
 
 services:
     
-  txqueue-test:
-    container_name: txqueue-test
+  txqueue-worker-test:
+    container_name: txqueue-worker-test
     build:
       context: .
-      dockerfile: test/Dockerfile
-    image: txqueue-test:0.1.0
+      dockerfile: worker/test/Dockerfile
+    image: txqueue-worker-test:0.1.0
     environment:
       REDIS_QUEUE_HOST: redis
       REDIS_QUEUE_PORT: 6379

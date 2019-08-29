@@ -1,8 +1,13 @@
 import logging
 import json
-import time
+import docker
 
+logger = logging.getLogger()
+logger.setLevel(logging.INFO)
 def run(data):
-    s = "from rqworker " + json.dumps(data)
+    s = "from worker " + json.dumps(data)
     logging.info(s)
-    return s
+    client = docker.from_env()
+    ret = client.containers.run(data["image"], command=data.get("command"), remove=True)
+    logging.info("ret = {0}".format(ret))
+    return ret.decode("utf-8")
