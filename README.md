@@ -56,7 +56,13 @@ docker run -p 8080:8080 swagger_server
 ```
 {
   "image": docker image,
-  "command": command to run in image
+  "command": command to run in image,
+  "mounts": [
+    "source": src,
+    "target": tgt,
+    "type": type,
+    "read_only": read only
+  ]
 }
 ```
 
