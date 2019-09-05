@@ -10,7 +10,7 @@ services:
     image: txqueue-worker-test:0.1.0
     command: ["-vv"]
     volumes:
-      - /tmp:/tmp
+      - tmpVol:/tmpVol
     environment:
       REDIS_QUEUE_HOST: redis
       REDIS_QUEUE_PORT: 6379
@@ -19,6 +19,8 @@ services:
     depends_on:
       - redis
       - txqueue
+volumes:
+  tmpVol: {}
     
 
 

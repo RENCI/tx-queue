@@ -59,29 +59,40 @@ def test_run_rqworker():
     
 
 def test_run_rqworker_volume_read():
-    assert not os.path.exists("/tmp/read")
+    assert not os.path.exists("/tmpVol/read")
         
-    with open("/tmp/read", mode="w+") as f:
+    with open("/tmpVol/read", mode="w+") as f:
         f.write("from rq")
-        
-    resp = post_task("ubuntu:18.04", "cat /read", volumes=[
-        {
-            "source": "/tmp/read",
-            "target": "/read",
-            "type": "bind",
-            "read_only": True
-        }
-    ])
-    task_id = resp.json()
-    resp2 = get_task(task_id)
-    print(resp2.json())
-    while resp2.json()["status"] in ["queued", "started"]:
-        time.sleep(1)
+        f.flush()
+
+    try:
+        resp = post_task("ubuntu:18.04", "/bin/bash -c \"cat /tmpVol/read > /tmpVol/read2\"",
+                         volumes=[
+                             {
+                                 "source": "tx-queue_tmpVol",
+                                 "target": "/tmpVol",
+                                 "type": "volume",
+                                 "read_only": False
+                             }
+                         ])
+        task_id = resp.json()
         resp2 = get_task(task_id)
         print(resp2.json())
+        while resp2.json()["status"] in ["queued", "started"]:
+            time.sleep(1)
+            resp2 = get_task(task_id)
+            print(resp2.json())
         
-    assert resp2.json()["result"] == "from rq\n"
-    os.unlink("/tmp/read")
+        assert resp2.json()["status"] == "finished"
+        #assert resp2.json()["result"] == "from rq"
+        assert os.path.exists("/tmpVol/read2")
+        with open("/tmpVol/read2", mode="r") as f:
+            s = f.readline()
+            
+        assert s == "from rq"
+    finally:
+        os.unlink("/tmpVol/read")
+        os.unlink("/tmpVol/read2")
 
 
 
