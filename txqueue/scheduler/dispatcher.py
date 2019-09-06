@@ -50,7 +50,8 @@ def get_job_by_id(job_id):  # noqa: E501
         "started_at": str(job.started_at),
         "ended_at": str(job.ended_at),
         "description": job.description,
-        "result": job.result
+        "result": job.result,
+        "exc_info": job.exc_info
     }
 
 

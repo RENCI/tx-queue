@@ -6,6 +6,7 @@ import json
 import redis
 from rq import Queue, Worker
 from multiprocessing import Process
+import shutil
 from utils import startWorker, redisQueue
 
 @pytest.fixture(scope="session", autouse=True)
@@ -129,8 +130,28 @@ def test_run_rqworker():
     runWorker()
     resp3 = get_task()
     assert len(resp3.json()) == 0
-    assert get_task(resp.json()).json()["result"] == "from rqworker \"task\""
+    resp4 = get_task(resp.json())
+    assert resp4.json()["status"] == "finished"    
+    assert resp4.json()["result"] == "from rqworker \"task\""
     
+
+def test_run_rqworker_exc():
+    shutil.move("entrypoint.py", "entrypoint.py.original")
+    shutil.copy("entrypoint_exc.py", "entrypoint.py")
+    resp0 = get_task()
+    assert len(resp0.json()) == 0
+    resp = post_task()
+    resp2 = get_task()
+    assert len(resp2.json()) == 1
+    assert resp.json() in resp2.json()
+    runWorker()
+    resp3 = get_task()
+    assert len(resp3.json()) == 0
+    resp4 = get_task(resp.json())
+    assert resp4.json()["status"] == "failed"    
+    assert "exc from rqworker \"task\"" in resp4.json()["exc_info"]
+    os.unlink("entrypoint.py")
+    shutil.move("entrypoint.py.original", "entrypoint.py")
 
 
 
