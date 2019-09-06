@@ -8,6 +8,7 @@ services:
       context: .
       dockerfile: test/Dockerfile
     image: txqueue-test:0.1.0
+    # command: ["-s", "-x", "-k", "test_run_rqworker"]
     environment:
       REDIS_QUEUE_HOST: redis
       REDIS_QUEUE_PORT: 6379

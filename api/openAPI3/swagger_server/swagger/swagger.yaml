@@ -55,6 +55,17 @@ paths:
         or it could be a quoted unique id that the application-specific worker knows
         how to lookup.
       operationId: submit_job
+      parameters:
+        - name: job_timeout
+          in: query
+          required: false
+          schema:
+            type: integer
+        - name: result_ttl
+          in: query
+          required: false
+          schema:
+            type: integer
       requestBody:
         content:
           application/json:

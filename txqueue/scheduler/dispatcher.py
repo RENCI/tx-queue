@@ -43,17 +43,20 @@ def get_job_by_id(job_id):  # noqa: E501
     :rtype: Job
     """
     job = q.fetch_job(job_id)
-    return {
-        "status": job.get_status(),
-        "name": job.func_name,
-        "created_at": str(job.created_at),
-        "enqueued_at": str(job.enqueued_at),
-        "started_at": str(job.started_at),
-        "ended_at": str(job.ended_at),
-        "description": job.description,
-        "result": job.result,
-        "exc_info": job.exc_info
-    }
+    if job == None:
+        return 'Not Found', 404
+    else:
+        return {
+            "status": job.get_status(),
+            "name": job.func_name,
+            "created_at": str(job.created_at),
+            "enqueued_at": str(job.enqueued_at),
+            "started_at": str(job.started_at),
+            "ended_at": str(job.ended_at),
+            "description": job.description,
+            "result": job.result,
+            "exc_info": job.exc_info
+        }
 
 
 def get_job_queue():  # noqa: E501
@@ -67,7 +70,7 @@ def get_job_queue():  # noqa: E501
     return q.job_ids
 
 
-def submit_job(body=None):  # noqa: E501
+def submit_job(job_timeout, result_ttl, body=None):  # noqa: E501
     """Submit a job
 
     set up the run outside of the scheduler. The scheduler doesn&#x27;t care what the set-up looks like as long as it&#x27;s well-constructed JSON. For example, the run could be a serialized object with all the run parameters, or it could be a quoted unique id that the application-specific worker knows how to lookup. # noqa: E501
@@ -77,7 +80,12 @@ def submit_job(body=None):  # noqa: E501
 
     :rtype: Job
     """
-    pTable = q.enqueue(entrypoint.run, args=[body], job_timeout=TASK_TIME, result_ttl=RESULT_TTL)
+    if job_timeout == None:
+        job_timeout = TASK_TIME
+
+    if result_ttl == None:
+        result_ttl = RESULT_TTL
+    pTable = q.enqueue(entrypoint.run, args=[body], job_timeout=job_timeout, result_ttl=result_ttl)
     return pTable.id            
 
 

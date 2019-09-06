@@ -55,8 +55,8 @@ def runWorker():
     p.terminate()
 
 
-def post_task():
-    resp = requests.post("http://txqueue:8080/tx-queue/2/scheduler/job", headers=json_headers, data=json.dumps("task"))
+def post_task(params={}):
+    resp = requests.post("http://txqueue:8080/tx-queue/2/scheduler/job", headers=json_headers, data=json.dumps("task"), params=params)
     print(resp)
     return resp
 
@@ -152,6 +152,42 @@ def test_run_rqworker_exc():
     assert "exc from rqworker \"task\"" in resp4.json()["exc_info"]
     os.unlink("entrypoint.py")
     shutil.move("entrypoint.py.original", "entrypoint.py")
+
+
+def test_run_rqworker_result_ttl():
+    resp0 = get_task()
+    assert len(resp0.json()) == 0
+    resp = post_task(params={
+        "result_ttl": 0
+    })
+    resp2 = get_task()
+    assert len(resp2.json()) == 1
+    assert resp.json() in resp2.json()
+    runWorker()
+    time.sleep(1)
+    resp3 = get_task()
+    assert len(resp3.json()) == 0
+    resp4 = get_task(resp.json())
+    assert resp4.status_code == 404
+    assert resp4.json() == "Not Found"
+
+
+def test_run_rqworker_result_ttl2():
+    resp0 = get_task()
+    assert len(resp0.json()) == 0
+    resp = post_task(params={
+        "result_ttl": -1
+    })
+    resp2 = get_task()
+    assert len(resp2.json()) == 1
+    assert resp.json() in resp2.json()
+    runWorker()
+    resp3 = get_task()
+    assert len(resp3.json()) == 0
+    resp4 = get_task(resp.json())
+    assert resp4.json()["status"] == "finished"    
+    assert resp4.json()["result"] == "from rqworker \"task\""
+
 
 
 
