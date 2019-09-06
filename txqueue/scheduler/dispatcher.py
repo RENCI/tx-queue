@@ -14,6 +14,7 @@ import entrypoint
 q = Queue(connection=redis.StrictRedis(host=os.environ["REDIS_QUEUE_HOST"], port=int(os.environ["REDIS_QUEUE_PORT"]), db=int(os.environ["REDIS_QUEUE_DB"])))
 
 TASK_TIME=os.environ["TASK_TIME"]
+RESULT_TTL=int(os.environ["RESULT_TTL"])
 
 def delete_job(job_id):
     """Delete my job by Id
@@ -76,7 +77,7 @@ def submit_job(body=None):  # noqa: E501
 
     :rtype: Job
     """
-    pTable = q.enqueue(entrypoint.run, args=[body], job_timeout=TASK_TIME)
+    pTable = q.enqueue(entrypoint.run, args=[body], job_timeout=TASK_TIME, result_ttl=RESULT_TTL)
     return pTable.id            
 
 

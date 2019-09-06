@@ -25,7 +25,8 @@ services:
       REDIS_QUEUE_HOST: redis
       REDIS_QUEUE_PORT: 6379
       REDIS_QUEUE_DB: 0
-      TASK_TIME: 3000
+      TASK_TIME: $TASK_TIME
+      RESULT_TTL: $RESULT_TTL
     depends_on:
       - redis
     
