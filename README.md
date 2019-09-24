@@ -70,18 +70,18 @@ docker run -p 8080:8080 swagger_server
 
 ## run
 ```
-docker-compose -f docker-compose.yml up --build
+docker-compose -f docker-compose.yml up --build -V
 ```
 
 ## run with worker
 ```
-docker-compose -f docker-compose.yml -f worker/docker-compose.yml up --build
+docker-compose -f docker-compose.yml -f worker/docker-compose.yml up --build -V
 ```
 
 
 ## test
 ```
-docker-compose -f docker-compose.yml -f test/docker-compose.yml up --build --exit-code-from txqueue-test
-docker-compose -f docker-compose.yml -f worker/docker-compose.yml -f worker/test/docker-compose.yml up --build --exit-code-from txqueue-worker-test
+docker-compose -f docker-compose.yml -f test/docker-compose.yml up --build -V --exit-code-from txqueue-test
+docker-compose -f docker-compose.yml -f worker/docker-compose.yml -f worker/test/docker-compose.yml up --build -V --exit-code-from txqueue-worker-test
 
 ```
